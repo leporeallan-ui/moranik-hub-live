@@ -18,7 +18,7 @@ export const EmailVerification: React.FC = () => {
       }
 
       try {
-        const response = await fetch('http://localhost:5000/api/auth/verify-email', {
+        const response = await fetch('https://moranik-hub-live.vercel.app/api/auth/verify-email', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email: decodeURIComponent(email), code }),

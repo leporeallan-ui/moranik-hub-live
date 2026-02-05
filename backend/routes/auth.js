@@ -34,7 +34,7 @@ if (!fs.existsSync(TOKENS_FILE)) {
 
 // Initialize admin credentials file if it doesn't exist
 if (!fs.existsSync(ADMIN_FILE)) {
-  const hashedPassword = require('bcryptjs').hashSync(DEFAULT_ADMIN.password, 10);
+  const hashedPassword = bcrypt.hashSync(DEFAULT_ADMIN.password, 10);
   const adminData = {
     username: DEFAULT_ADMIN.username,
     password: hashedPassword,
