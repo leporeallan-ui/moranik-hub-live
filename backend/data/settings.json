@@ -1,0 +1,68 @@
+{
+  "site": {
+    "name": "Moranik Hub",
+    "description": "Your Digital Marketplace",
+    "logo": "",
+    "favicon": "",
+    "theme": {
+      "primaryColor": "#ff4444",
+      "secondaryColor": "#0f0f0f",
+      "accentColor": "#666666"
+    },
+    "contact": {
+      "email": "support@moranik.com",
+      "phone": "",
+      "address": ""
+    }
+  },
+  "features": {
+    "userRegistration": true,
+    "emailVerification": false,
+    "passwordRequirements": {
+      "minLength": 6,
+      "requireUppercase": false,
+      "requireLowercase": false,
+      "requireNumbers": false,
+      "requireSpecialChars": false
+    },
+    "fileUpload": {
+      "maxFileSize": "50MB",
+      "allowedTypes": [
+        "jpg",
+        "png",
+        "pdf",
+        "zip",
+        "mp3",
+        "mp4",
+        "doc",
+        "docx"
+      ]
+    },
+    "marketplace": {
+      "enablePricing": true,
+      "enableReviews": true,
+      "enableDownloads": true,
+      "enableUploads": true
+    }
+  },
+  "security": {
+    "enablePasswordProtection": false,
+    "sessionTimeout": "7d",
+    "maxLoginAttempts": 5,
+    "lockoutDuration": "15m"
+  },
+  "notifications": {
+    "emailNotifications": false,
+    "pushNotifications": false,
+    "adminAlerts": true
+  },
+  "maintenance": {
+    "mode": false,
+    "message": "Site is under maintenance. Please check back later."
+  },
+  "analytics": {
+    "enableTracking": true,
+    "enableUserStats": true,
+    "enableProductStats": true
+  }
+}

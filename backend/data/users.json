@@ -1,1 +1,24 @@
-[]
+[
+  {
+    "id": "1770326818172",
+    "username": "ALLAN",
+    "email": "LeporeAllan@gmail.com",
+    "password": "$2a$10$FWLuu1OBxEmsBCGtf6dUm.MGA37NafnIpYB3qJqiz6imuWy39gQgG",
+    "fullName": "ALLAN",
+    "isEmailVerified": true,
+    "verified": true,
+    "createdAt": "2026-02-05T21:26:58.172Z",
+    "updatedAt": "2026-02-05T21:26:58.172Z"
+  },
+  {
+    "id": "1770328917136",
+    "username": "testuser",
+    "email": "test@moranik.com",
+    "password": "$2a$10$hkMBz5FuA/zDvVni3Dp1aOqktKhN/LTfLLhm7IPASD7Pl/qorq1.u",
+    "fullName": "Test User",
+    "isEmailVerified": true,
+    "verified": true,
+    "createdAt": "2026-02-05T22:01:57.136Z",
+    "updatedAt": "2026-02-05T22:01:57.136Z"
+  }
+]

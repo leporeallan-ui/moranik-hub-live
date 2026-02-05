@@ -5,6 +5,8 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { fileURLToPath } from 'url';
 import { sendEmail, generateToken } from '../services/emailService.js';
+import { userService } from '../services/databaseService.js';
+import settingsService from '../services/settingsService.js';
 
 const router = express.Router();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -17,6 +19,14 @@ const ADMIN_FILE = path.join(DATA_DIR, 'admin.json');
 const DEFAULT_ADMIN = {
   username: 'admin',
   password: 'admin@123', // Default password - CHANGE THIS!
+};
+
+// Default test user credentials
+const DEFAULT_USER = {
+  username: 'testuser',
+  email: 'test@moranik.com',
+  password: 'test123',
+  fullName: 'Test User'
 };
 
 // Ensure data directory and files exist
@@ -45,6 +55,33 @@ if (!fs.existsSync(ADMIN_FILE)) {
   console.log('   Username:', DEFAULT_ADMIN.username);
   console.log('   Password:', DEFAULT_ADMIN.password);
   console.log('   ⚠️  CHANGE THESE IN PRODUCTION!');
+}
+
+// Initialize default test user if it doesn't exist
+if (!fs.existsSync(USERS_FILE)) {
+  fs.writeFileSync(USERS_FILE, JSON.stringify([]));
+}
+
+// Create default test user if no users exist
+const users = JSON.parse(fs.readFileSync(USERS_FILE, 'utf8'));
+if (users.length === 0) {
+  const hashedPassword = bcrypt.hashSync(DEFAULT_USER.password, 10);
+  const testUser = {
+    id: Date.now().toString(),
+    username: DEFAULT_USER.username,
+    email: DEFAULT_USER.email,
+    password: hashedPassword,
+    fullName: DEFAULT_USER.fullName,
+    isEmailVerified: true,
+    createdAt: new Date().toISOString(),
+    lastLogin: new Date().toISOString()
+  };
+  users.push(testUser);
+  fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
+  console.log('✅ Default test user created');
+  console.log('   Username:', DEFAULT_USER.username);
+  console.log('   Password:', DEFAULT_USER.password);
+  console.log('   Email:', DEFAULT_USER.email);
 }
 
 // Helper functions
@@ -79,74 +116,60 @@ const generateVerificationCode = () => {
 // Register endpoint
 router.post('/register', async (req, res) => {
   try {
-    let username, email, password;
+    // Check if user registration is enabled
+    if (!settingsService.isUserRegistrationEnabled()) {
+      return res.status(403).json({ error: 'User registration is currently disabled' });
+    }
+
+    let username, email, password, fullName;
     try {
-      ({ username, email, password } = req.body);
+      ({ username, email, password, fullName } = req.body);
     } catch (error) {
       return res.status(400).json({ error: 'Invalid JSON in request body' });
     }
 
-    // Validation
-    if (!username || !email || !password) {
+    // Basic validation (password requirements disabled for now)
+    if (!username || !email || !password || !fullName) {
       return res.status(400).json({ error: 'All fields are required' });
     }
 
-    const users = getUsers();
-
     // Check if user already exists
-    if (users.some(u => u.username === username)) {
+    const existingUserByUsername = userService.getByUsername(username);
+    const existingUserByEmail = userService.getByEmail(email);
+
+    if (existingUserByUsername) {
       return res.status(400).json({ error: 'Username already exists' });
     }
 
-    if (users.some(u => u.email === email)) {
-      return res.status(400).json({ error: 'Email already registered' });
+    if (existingUserByEmail) {
+      return res.status(400).json({ error: 'Email already exists' });
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Create verification code
-    const verificationCode = generateVerificationCode();
-    const expiresAt = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
-
-    // Create user
-    const newUser = {
-      id: Date.now().toString(),
+    // Create new user using database service
+    const newUser = await userService.create({
       username,
       email,
-      password: hashedPassword,
-      verified: false,
-      verificationCode,
-      verificationExpiresAt: expiresAt,
-      createdAt: new Date().toISOString(),
-    };
-
-    users.push(newUser);
-    saveUsers(users);
-
-    // Send verification email
-    const verificationLink = `http://localhost:3000/verify-email?code=${verificationCode}&email=${encodeURIComponent(email)}`;
-    
-    await sendEmail(
-      email,
-      'Verify Your Email - Marketplace',
-      `
-        <h2>Welcome to Marketplace!</h2>
-        <p>Please verify your email address to activate your account.</p>
-        <p>Your verification code is: <strong>${verificationCode}</strong></p>
-        <p>Or click the link below:</p>
-        <a href="${verificationLink}" style="padding: 10px 20px; background: #667eea; color: white; text-decoration: none; border-radius: 5px; display: inline-block;">
-          Verify Email
-        </a>
-        <p>This code expires in 24 hours.</p>
-      `
-    );
-
-    res.json({
-      success: true,
-      message: 'Registration successful. Please check your email to verify your account.',
-      userId: newUser.id,
+      fullName,
+      password,
+      isEmailVerified: !settingsService.isEmailVerificationEnabled() // Auto-verify if email verification is disabled
     });
+
+    if (newUser) {
+      res.status(201).json({
+        success: true,
+        message: settingsService.isEmailVerificationEnabled() 
+          ? 'Registration successful! Please check your email for verification.'
+          : 'Registration successful!',
+        user: {
+          id: newUser.id,
+          username: newUser.username,
+          email: newUser.email,
+          fullName: newUser.fullName
+        }
+      });
+    } else {
+      res.status(500).json({ error: 'Registration failed' });
+    }
   } catch (error) {
     console.error('Registration error:', error);
     res.status(500).json({ error: 'Registration failed' });
@@ -214,24 +237,31 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ error: 'Username and password are required' });
     }
 
-    const users = getUsers();
-    const user = users.find(u => u.username === username);
+    // Use database service to find user
+    const user = userService.getByUsername(username);
 
     if (!user) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    // Check if email is verified
-    if (!user.verified) {
-      return res.status(403).json({ error: 'Please verify your email before logging in' });
+    // Check if email is verified (only if email verification is enabled)
+    if (settingsService.isEmailVerificationEnabled()) {
+      const isVerified = user.isEmailVerified !== undefined ? user.isEmailVerified : (user.verified !== undefined ? user.verified : false);
+      
+      if (!isVerified) {
+        return res.status(403).json({ error: 'Please verify your email before logging in' });
+      }
     }
 
-    // Check password
+    // Check password using bcrypt
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
+
+    // Update last login
+    userService.update(user.id, { lastLogin: new Date().toISOString() });
 
     // Generate JWT token
     const token = jwt.sign(
@@ -248,6 +278,7 @@ router.post('/login', async (req, res) => {
         id: user.id,
         username: user.username,
         email: user.email,
+        fullName: user.fullName || user.username
       },
     });
   } catch (error) {

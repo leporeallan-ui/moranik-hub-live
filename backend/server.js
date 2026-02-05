@@ -8,6 +8,9 @@ import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import uploadRoutes from './routes/uploads.js';
 import authRoutes from './routes/auth.js';
+import databaseRoutes from './routes/database.js';
+import productRoutes from './routes/products.js';
+import settingsRoutes from './routes/settings.js';
 
 // Load environment variables
 dotenv.config();
@@ -58,6 +61,9 @@ app.use('/uploads', express.static(uploadsDir));
 // Routes
 app.use('/api/uploads', uploadRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/database', databaseRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/settings', settingsRoutes);
 
 // Serve frontend static files in production
 if (NODE_ENV === 'production' && existsSync(path.join(__dirname, 'public'))) {
@@ -83,7 +89,24 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-  console.log(`Server accessible on network: http://192.168.100.179:${PORT}`);
-  console.log(`Frontend accessible at http://localhost:3000`);
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
+  console.log(`🌐 Server accessible on network: http://192.168.100.179:${PORT}`);
+  console.log(`🖥 Frontend accessible at http://localhost:3000`);
+  console.log('');
+  console.log('🔐 DEFAULT CREDENTIALS FOR TESTING:');
+  console.log('=====================================');
+  console.log('👤 ADMIN LOGIN:');
+  console.log('   Username: admin');
+  console.log('   Password: admin@123');
+  console.log('');
+  console.log('👤 TEST USER LOGIN:');
+  console.log('   Username: testuser');
+  console.log('   Password: test123');
+  console.log('   Email: test@moranik.com');
+  console.log('');
+  console.log('📊 DATABASE MANAGER:');
+  console.log('   URL: http://localhost:5000/database-manager.html');
+  console.log('   Password: moranik2024');
+  console.log('   🔒 All database operations are password protected');
+  console.log('=====================================');
 });

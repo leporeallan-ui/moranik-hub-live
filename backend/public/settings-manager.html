@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moranik Hub - Settings Manager</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #ff4444;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 0 0 20px rgba(255, 68, 68, 0.3);
+        }
+        .login-section {
+            max-width: 400px;
+            margin: 50px auto;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 10px;
+        }
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        .setting-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .setting-card h3 {
+            color: #ff4444;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #ff4444;
+            padding-bottom: 10px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #cccccc;
+            font-weight: 500;
+        }
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="number"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ff4444;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 14px;
+        }
+        input[type="checkbox"] {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .btn {
+            background: #ff4444;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+            margin: 5px;
+        }
+        .btn:hover {
+            background: #ff6666;
+        }
+        .btn-secondary {
+            background: #666666;
+        }
+        .btn-secondary:hover {
+            background: #888888;
+        }
+        .btn-danger {
+            background: #ff6666;
+        }
+        .btn-danger:hover {
+            background: #ff8888;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            text-align: center;
+        }
+        .status.success {
+            background: rgba(76, 175, 80, 0.2);
+            border: 1px solid #4caf50;
+            color: #4caf50;
+        }
+        .status.error {
+            background: rgba(244, 67, 54, 0.2);
+            border: 1px solid #f44336;
+            color: #f44336;
+        }
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #ff4444;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ff4444;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s;
+        }
+        .tab.active {
+            border-bottom: 2px solid #ff4444;
+            color: #ff4444;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚙️ Settings Manager</h1>
+        
+        <div id="app-container">
+            <div class="loading">🔄 Loading settings...</div>
+        </div>
+    </div>
+
+    <script>
+        const SETTINGS_PASSWORD = 'moranik2024'; // Must match backend password
+        let currentSettings = null;
+        let isAuthenticated = false;
+
+        // Check authentication first
+        function checkAuthentication() {
+            const storedAuth = sessionStorage.getItem('settingsAuth');
+            if (storedAuth === SETTINGS_PASSWORD) {
+                isAuthenticated = true;
+                return true;
+            }
+            return false;
+        }
+
+        function showLoginForm() {
+            document.getElementById('app-container').innerHTML = `
+                <div class="login-section">
+                    <h2>🔐 Settings Manager - Login Required</h2>
+                    <div class="form-group">
+                        <label for="password">Settings Password:</label>
+                        <input type="password" id="password" placeholder="Enter settings password">
+                    </div>
+                    <button class="btn" onclick="authenticate()" style="width: 100%;">🔓 Unlock Settings</button>
+                    <div style="text-align: center; margin-top: 20px; color: #888; font-size: 14px;">
+                        <p>🔒 This area is password protected</p>
+                        <p>Contact your administrator for access</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function authenticate() {
+            const password = document.getElementById('password').value;
+            
+            if (password === SETTINGS_PASSWORD) {
+                sessionStorage.setItem('settingsAuth', SETTINGS_PASSWORD);
+                isAuthenticated = true;
+                loadSettingsInterface();
+            } else {
+                alert('❌ Invalid password! Please try again.');
+                document.getElementById('password').value = '';
+                document.getElementById('password').focus();
+            }
+        }
+
+        function loadSettingsInterface() {
+            document.getElementById('app-container').innerHTML = `
+                <div class="tabs">
+                    <div class="tab active" onclick="showTab('site')">🌐 Site Settings</div>
+                    <div class="tab" onclick="showTab('features')">🚀 Features</div>
+                    <div class="tab" onclick="showTab('security')">🔒 Security</div>
+                    <div class="tab" onclick="showTab('maintenance')">🔧 Maintenance</div>
+                </div>
+
+                <div id="site-tab" class="tab-content active">
+                    <div class="settings-grid">
+                        <div class="setting-card">
+                            <h3>Site Information</h3>
+                            <div class="form-group">
+                                <label>Site Name:</label>
+                                <input type="text" id="site-name" placeholder="Moranik Hub">
+                            </div>
+                            <div class="form-group">
+                                <label>Site Description:</label>
+                                <textarea id="site-description" rows="3" placeholder="Your Digital Marketplace"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Contact Email:</label>
+                                <input type="email" id="contact-email" placeholder="support@moranik.com">
+                            </div>
+                        </div>
+                        <div class="setting-card">
+                            <h3>Theme Settings</h3>
+                            <div class="form-group">
+                                <label>Primary Color:</label>
+                                <input type="text" id="primary-color" placeholder="#ff4444">
+                            </div>
+                            <div class="form-group">
+                                <label>Secondary Color:</label>
+                                <input type="text" id="secondary-color" placeholder="#0f0f0f">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="features-tab" class="tab-content">
+                    <div class="settings-grid">
+                        <div class="setting-card">
+                            <h3>User Management</h3>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="user-registration">
+                                <label for="user-registration">Enable User Registration</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="email-verification">
+                                <label for="email-verification">Enable Email Verification</label>
+                            </div>
+                        </div>
+                        <div class="setting-card">
+                            <h3>Marketplace Features</h3>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="enable-pricing">
+                                <label for="enable-pricing">Enable Pricing</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="enable-reviews">
+                                <label for="enable-reviews">Enable Reviews</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="enable-uploads">
+                                <label for="enable-uploads">Enable Uploads</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="security-tab" class="tab-content">
+                    <div class="settings-grid">
+                        <div class="setting-card">
+                            <h3>Security Settings</h3>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="password-protection">
+                                <label for="password-protection">Enable Password Protection</label>
+                            </div>
+                            <div class="form-group">
+                                <label>Session Timeout:</label>
+                                <select id="session-timeout">
+                                    <option value="1h">1 Hour</option>
+                                    <option value="24h">24 Hours</option>
+                                    <option value="7d">7 Days</option>
+                                    <option value="30d">30 Days</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="setting-card">
+                            <h3>Password Requirements</h3>
+                            <div class="form-group">
+                                <label>Minimum Length:</label>
+                                <input type="number" id="min-length" min="4" max="50">
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="require-uppercase">
+                                <label for="require-uppercase">Require Uppercase</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="require-numbers">
+                                <label for="require-numbers">Require Numbers</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="maintenance-tab" class="tab-content">
+                    <div class="settings-grid">
+                        <div class="setting-card">
+                            <h3>Maintenance Mode</h3>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="maintenance-mode">
+                                <label for="maintenance-mode">Enable Maintenance Mode</label>
+                            </div>
+                            <div class="form-group">
+                                <label>Maintenance Message:</label>
+                                <textarea id="maintenance-message" rows="3" placeholder="Site is under maintenance. Please check back later."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 30px;">
+                    <button class="btn" onclick="saveSettings()">💾 Save Settings</button>
+                    <button class="btn btn-secondary" onclick="loadSettings()">🔄 Reload</button>
+                    <button class="btn btn-danger" onclick="resetSettings()">⚠️ Reset to Defaults</button>
+                    <button class="btn btn-secondary" onclick="logout()" style="background: #666;">🔒 Logout</button>
+                </div>
+
+                <div id="status-message"></div>
+            `;
+            
+            // Load current settings
+            loadSettings();
+        }
+
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            // Show selected tab
+            document.querySelector(`[onclick="showTab('${tabName}')"]`).classList.add('active');
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+        }
+
+        async function loadSettings() {
+            try {
+                const response = await fetch('/api/settings/', {
+                    headers: {
+                        'Authorization': 'Basic ' + btoa('admin:' + SETTINGS_PASSWORD)
+                    }
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    currentSettings = result.data;
+                    populateForm();
+                    showStatus('Settings loaded successfully', 'success');
+                } else {
+                    showStatus('Error loading settings: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showStatus('Network error: ' + error.message, 'error');
+            }
+        }
+
+        function populateForm() {
+            if (!currentSettings) return;
+
+            // Site settings
+            document.getElementById('site-name').value = currentSettings.site?.name || '';
+            document.getElementById('site-description').value = currentSettings.site?.description || '';
+            document.getElementById('contact-email').value = currentSettings.site?.contact?.email || '';
+            document.getElementById('primary-color').value = currentSettings.site?.theme?.primaryColor || '';
+            document.getElementById('secondary-color').value = currentSettings.site?.theme?.secondaryColor || '';
+
+            // Feature settings
+            document.getElementById('user-registration').checked = currentSettings.features?.userRegistration || false;
+            document.getElementById('email-verification').checked = currentSettings.features?.emailVerification || false;
+            document.getElementById('enable-pricing').checked = currentSettings.features?.marketplace?.enablePricing || false;
+            document.getElementById('enable-reviews').checked = currentSettings.features?.marketplace?.enableReviews || false;
+            document.getElementById('enable-uploads').checked = currentSettings.features?.marketplace?.enableUploads || false;
+
+            // Security settings
+            document.getElementById('password-protection').checked = currentSettings.security?.enablePasswordProtection || false;
+            document.getElementById('session-timeout').value = currentSettings.security?.sessionTimeout || '7d';
+            document.getElementById('min-length').value = currentSettings.features?.passwordRequirements?.minLength || 6;
+            document.getElementById('require-uppercase').checked = currentSettings.features?.passwordRequirements?.requireUppercase || false;
+            document.getElementById('require-numbers').checked = currentSettings.features?.passwordRequirements?.requireNumbers || false;
+
+            // Maintenance settings
+            document.getElementById('maintenance-mode').checked = currentSettings.maintenance?.mode || false;
+            document.getElementById('maintenance-message').value = currentSettings.maintenance?.message || '';
+        }
+
+        async function saveSettings() {
+            if (!isAuthenticated) return;
+
+            const settings = {
+                site: {
+                    name: document.getElementById('site-name').value,
+                    description: document.getElementById('site-description').value,
+                    contact: {
+                        email: document.getElementById('contact-email').value
+                    },
+                    theme: {
+                        primaryColor: document.getElementById('primary-color').value,
+                        secondaryColor: document.getElementById('secondary-color').value
+                    }
+                },
+                features: {
+                    userRegistration: document.getElementById('user-registration').checked,
+                    emailVerification: document.getElementById('email-verification').checked,
+                    marketplace: {
+                        enablePricing: document.getElementById('enable-pricing').checked,
+                        enableReviews: document.getElementById('enable-reviews').checked,
+                        enableUploads: document.getElementById('enable-uploads').checked
+                    },
+                    passwordRequirements: {
+                        minLength: parseInt(document.getElementById('min-length').value),
+                        requireUppercase: document.getElementById('require-uppercase').checked,
+                        requireNumbers: document.getElementById('require-numbers').checked
+                    }
+                },
+                security: {
+                    enablePasswordProtection: document.getElementById('password-protection').checked,
+                    sessionTimeout: document.getElementById('session-timeout').value
+                },
+                maintenance: {
+                    mode: document.getElementById('maintenance-mode').checked,
+                    message: document.getElementById('maintenance-message').value
+                }
+            };
+
+            try {
+                const response = await fetch('/api/settings/', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Basic ' + btoa('admin:' + SETTINGS_PASSWORD)
+                    },
+                    body: JSON.stringify(settings)
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    currentSettings = result.data;
+                    showStatus('Settings saved successfully!', 'success');
+                } else {
+                    showStatus('Error saving settings: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showStatus('Network error: ' + error.message, 'error');
+            }
+        }
+
+        async function resetSettings() {
+            if (!isAuthenticated) return;
+            
+            if (confirm('⚠️ This will reset all settings to default values. Are you sure?')) {
+                try {
+                    const response = await fetch('/api/settings/reset', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': 'Basic ' + btoa('admin:' + SETTINGS_PASSWORD)
+                        }
+                    });
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        currentSettings = result.data;
+                        populateForm();
+                        showStatus('Settings reset to defaults!', 'success');
+                    } else {
+                        showStatus('Error resetting settings: ' + result.error, 'error');
+                    }
+                } catch (error) {
+                    showStatus('Network error: ' + error.message, 'error');
+                }
+            }
+        }
+
+        function logout() {
+            sessionStorage.removeItem('settingsAuth');
+            isAuthenticated = false;
+            showLoginForm();
+        }
+
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('status-message');
+            statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
+            setTimeout(() => {
+                statusDiv.innerHTML = '';
+            }, 5000);
+        }
+
+        // Initialize page
+        if (checkAuthentication()) {
+            loadSettingsInterface();
+        } else {
+            showLoginForm();
+        }
+    </script>
+</body>
+</html>
