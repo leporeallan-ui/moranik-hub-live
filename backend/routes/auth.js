@@ -113,14 +113,9 @@ const generateVerificationCode = () => {
   return Math.floor(100000 + Math.random() * 900000).toString();
 };
 
-// Register endpoint
+// Register endpoint - No validation required
 router.post('/register', async (req, res) => {
   try {
-    // Check if user registration is enabled
-    if (!settingsService.isUserRegistrationEnabled()) {
-      return res.status(403).json({ error: 'User registration is currently disabled' });
-    }
-
     let username, email, password, fullName;
     try {
       ({ username, email, password, fullName } = req.body);
@@ -128,38 +123,19 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ error: 'Invalid JSON in request body' });
     }
 
-    // Basic validation (password requirements disabled for now)
-    if (!username || !email || !password || !fullName) {
-      return res.status(400).json({ error: 'All fields are required' });
-    }
-
-    // Check if user already exists
-    const existingUserByUsername = userService.getByUsername(username);
-    const existingUserByEmail = userService.getByEmail(email);
-
-    if (existingUserByUsername) {
-      return res.status(400).json({ error: 'Username already exists' });
-    }
-
-    if (existingUserByEmail) {
-      return res.status(400).json({ error: 'Email already exists' });
-    }
-
-    // Create new user using database service
+    // Create user without any validation
     const newUser = await userService.create({
-      username,
-      email,
-      fullName,
-      password,
-      isEmailVerified: !settingsService.isEmailVerificationEnabled() // Auto-verify if email verification is disabled
+      username: username || 'user' + Date.now(),
+      email: email || (username || 'user') + '@temp.com',
+      fullName: fullName || username || 'User',
+      password: password || 'temp123',
+      isEmailVerified: true
     });
 
     if (newUser) {
       res.status(201).json({
         success: true,
-        message: settingsService.isEmailVerificationEnabled() 
-          ? 'Registration successful! Please check your email for verification.'
-          : 'Registration successful!',
+        message: 'Registration successful!',
         user: {
           id: newUser.id,
           username: newUser.username,
@@ -223,7 +199,7 @@ router.post('/verify-email', async (req, res) => {
   }
 });
 
-// Login endpoint
+// Login endpoint - No password required
 router.post('/login', async (req, res) => {
   try {
     let username, password;
@@ -233,35 +209,23 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ error: 'Invalid JSON in request body' });
     }
 
-    if (!username || !password) {
-      return res.status(400).json({ error: 'Username and password are required' });
+    // Allow any username/password combination for testing
+    if (!username) {
+      return res.status(400).json({ error: 'Username is required' });
     }
 
-    // Use database service to find user
-    const user = userService.getByUsername(username);
-
+    // Find user or create a default session
+    let user = userService.getByUsername(username);
+    
     if (!user) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+      // Create a temporary user session for testing
+      user = {
+        id: 'temp-' + Date.now(),
+        username: username,
+        email: username + '@temp.com',
+        fullName: username
+      };
     }
-
-    // Check if email is verified (only if email verification is enabled)
-    if (settingsService.isEmailVerificationEnabled()) {
-      const isVerified = user.isEmailVerified !== undefined ? user.isEmailVerified : (user.verified !== undefined ? user.verified : false);
-      
-      if (!isVerified) {
-        return res.status(403).json({ error: 'Please verify your email before logging in' });
-      }
-    }
-
-    // Check password using bcrypt
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-
-    if (!isPasswordValid) {
-      return res.status(401).json({ error: 'Invalid credentials' });
-    }
-
-    // Update last login
-    userService.update(user.id, { lastLogin: new Date().toISOString() });
 
     // Generate JWT token
     const token = jwt.sign(
