@@ -2,7 +2,6 @@ import express from 'express';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-// import databaseAuth from '../middleware/auth.js'; // Disabled
 
 const router = express.Router();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));

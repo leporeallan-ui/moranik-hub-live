@@ -1,6 +1,5 @@
 import express from 'express';
 import settingsService from '../services/settingsService.js';
-// import databaseAuth from '../middleware/auth.js'; // Disabled
 
 const router = express.Router();
 
