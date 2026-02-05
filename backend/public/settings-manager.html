@@ -170,49 +170,18 @@
     </div>
 
     <script>
-        const SETTINGS_PASSWORD = 'moranik2024'; // Must match backend password
+        const SETTINGS_PASSWORD = null; // Disabled - no password required
         let currentSettings = null;
-        let isAuthenticated = false;
+        let isAuthenticated = true; // Always authenticated
 
         // Check authentication first
         function checkAuthentication() {
-            const storedAuth = sessionStorage.getItem('settingsAuth');
-            if (storedAuth === SETTINGS_PASSWORD) {
-                isAuthenticated = true;
-                return true;
-            }
-            return false;
+            return isAuthenticated; // Always return true
         }
 
         function showLoginForm() {
-            document.getElementById('app-container').innerHTML = `
-                <div class="login-section">
-                    <h2>🔐 Settings Manager - Login Required</h2>
-                    <div class="form-group">
-                        <label for="password">Settings Password:</label>
-                        <input type="password" id="password" placeholder="Enter settings password">
-                    </div>
-                    <button class="btn" onclick="authenticate()" style="width: 100%;">🔓 Unlock Settings</button>
-                    <div style="text-align: center; margin-top: 20px; color: #888; font-size: 14px;">
-                        <p>🔒 This area is password protected</p>
-                        <p>Contact your administrator for access</p>
-                    </div>
-                </div>
-            `;
-        }
-
-        function authenticate() {
-            const password = document.getElementById('password').value;
-            
-            if (password === SETTINGS_PASSWORD) {
-                sessionStorage.setItem('settingsAuth', SETTINGS_PASSWORD);
-                isAuthenticated = true;
-                loadSettingsInterface();
-            } else {
-                alert('❌ Invalid password! Please try again.');
-                document.getElementById('password').value = '';
-                document.getElementById('password').focus();
-            }
+            // No login form needed - password disabled
+            loadSettingsInterface();
         }
 
         function loadSettingsInterface() {
@@ -364,11 +333,7 @@
 
         async function loadSettings() {
             try {
-                const response = await fetch('/api/settings/', {
-                    headers: {
-                        'Authorization': 'Basic ' + btoa('admin:' + SETTINGS_PASSWORD)
-                    }
-                });
+                const response = await fetch('/api/settings/');
                 const result = await response.json();
                 
                 if (result.success) {
@@ -455,8 +420,7 @@
                 const response = await fetch('/api/settings/', {
                     method: 'PUT',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Basic ' + btoa('admin:' + SETTINGS_PASSWORD)
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify(settings)
                 });
@@ -479,10 +443,7 @@
             if (confirm('⚠️ This will reset all settings to default values. Are you sure?')) {
                 try {
                     const response = await fetch('/api/settings/reset', {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': 'Basic ' + btoa('admin:' + SETTINGS_PASSWORD)
-                        }
+                        method: 'POST'
                     });
                     const result = await response.json();
                     
@@ -500,7 +461,6 @@
         }
 
         function logout() {
-            sessionStorage.removeItem('settingsAuth');
             isAuthenticated = false;
             showLoginForm();
         }
