@@ -56,6 +56,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onClose }) => {
       setMessage('Login successful!');
       // Store token and redirect
       localStorage.setItem('token', result.token);
+      localStorage.setItem('userToken', result.token);
       setTimeout(() => {
         onClose?.();
         window.location.reload();

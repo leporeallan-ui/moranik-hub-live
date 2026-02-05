@@ -15,10 +15,22 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, onNavigate, cartC
   const isLanding = activeView === AppView.LANDING;
   const [showRegister, setShowRegister] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
+  
+  // Check if user is logged in
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    // Admin functionality removed
+    // Check if user is logged in
+    const userToken = localStorage.getItem('token') || localStorage.getItem('userToken');
+    setIsLoggedIn(!!userToken);
   }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('userToken');
+    setIsLoggedIn(false);
+    window.location.reload();
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-[#0f0f0f]">
@@ -56,22 +68,26 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, onNavigate, cartC
               >
                 Moranik Entertainment
               </button>
-              <button 
-                onClick={() => onNavigate('MARKETPLACE' as any)}
-                className={`text-sm font-semibold transition-colors ${
-                  activeView === 'MARKETPLACE' ? 'text-red-500' : 'text-slate-300 hover:text-red-500'
-                }`}
-              >
-                📦 Marketplace
-              </button>
-              <button 
-                onClick={() => onNavigate('UPLOAD' as any)}
-                className={`text-sm font-semibold transition-colors ${
-                  activeView === 'UPLOAD' ? 'text-red-500' : 'text-slate-300 hover:text-red-500'
-                }`}
-              >
-                📤 Upload Product
-              </button>
+              {isLoggedIn && (
+                <>
+                  <button 
+                    onClick={() => onNavigate('MARKETPLACE' as any)}
+                    className={`text-sm font-semibold transition-colors ${
+                      activeView === 'MARKETPLACE' ? 'text-red-500' : 'text-slate-300 hover:text-red-500'
+                    }`}
+                  >
+                    📦 Marketplace
+                  </button>
+                  <button 
+                    onClick={() => onNavigate('UPLOAD' as any)}
+                    className={`text-sm font-semibold transition-colors ${
+                      activeView === 'UPLOAD' ? 'text-red-500' : 'text-slate-300 hover:text-red-500'
+                    }`}
+                  >
+                    📤 Upload Product
+                  </button>
+                </>
+              )}
             </div>
 
             <div className="flex items-center space-x-4">
@@ -84,12 +100,25 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, onNavigate, cartC
                 )}
               </div>
               
-              <button className="px-5 py-2 rounded-full text-sm font-bold transition-all bg-transparent border-2 border-red-600 text-red-600 hover:bg-red-600 hover:text-white shadow-lg shadow-red-900/20" onClick={() => setShowRegister(true)}>
-                Register
-              </button>
-              <button className="px-5 py-2 rounded-full text-sm font-bold transition-all bg-red-600 text-white hover:bg-red-700 shadow-lg shadow-red-900/20" onClick={() => setShowLogin(true)}>
-                Login
-              </button>
+              {isLoggedIn ? (
+                <>
+                  <button 
+                    onClick={handleLogout}
+                    className="px-5 py-2 rounded-full text-sm font-bold transition-all bg-transparent border-2 border-red-600 text-red-600 hover:bg-red-600 hover:text-white shadow-lg shadow-red-900/20"
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button className="px-5 py-2 rounded-full text-sm font-bold transition-all bg-transparent border-2 border-red-600 text-red-600 hover:bg-red-600 hover:text-white shadow-lg shadow-red-900/20" onClick={() => setShowRegister(true)}>
+                    Register
+                  </button>
+                  <button className="px-5 py-2 rounded-full text-sm font-bold transition-all bg-red-600 text-white hover:bg-red-700 shadow-lg shadow-red-900/20" onClick={() => setShowLogin(true)}>
+                    Login
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
