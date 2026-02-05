@@ -156,7 +156,12 @@ router.post('/register', async (req, res) => {
 // Verify email endpoint
 router.post('/verify-email', async (req, res) => {
   try {
-    const { email, code } = req.body;
+    let email, code;
+    try {
+      ({ email, code } = req.body);
+    } catch (error) {
+      return res.status(400).json({ error: 'Invalid JSON in request body' });
+    }
 
     if (!email || !code) {
       return res.status(400).json({ error: 'Email and code are required' });
@@ -396,7 +401,12 @@ router.get('/profile', (req, res) => {
 // Admin login endpoint
 router.post('/admin-login', async (req, res) => {
   try {
-    const { username, password } = req.body;
+    let username, password;
+    try {
+      ({ username, password } = req.body);
+    } catch (error) {
+      return res.status(400).json({ error: 'Invalid JSON in request body' });
+    }
 
     if (!username || !password) {
       return res.status(400).json({ error: 'Admin username and password are required' });
@@ -448,7 +458,12 @@ router.post('/admin-login', async (req, res) => {
 router.post('/admin-change-password', async (req, res) => {
   try {
     const token = req.headers.authorization?.split(' ')[1];
-    const { currentPassword, newPassword } = req.body;
+    let currentPassword, newPassword;
+    try {
+      ({ currentPassword, newPassword } = req.body);
+    } catch (error) {
+      return res.status(400).json({ error: 'Invalid JSON in request body' });
+    }
 
     if (!token) {
       return res.status(401).json({ error: 'No admin token provided' });
