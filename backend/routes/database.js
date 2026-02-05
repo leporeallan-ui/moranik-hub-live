@@ -2,7 +2,7 @@ import express from 'express';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import databaseAuth from '../middleware/auth.js';
+// import databaseAuth from '../middleware/auth.js'; // Disabled
 
 const router = express.Router();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -36,8 +36,8 @@ const getTokens = () => {
   }
 };
 
-// Database Manager - View all data (Password Protected)
-router.get('/manager', databaseAuth, (req, res) => {
+// Database Manager - View all data (public - authentication disabled)
+router.get('/manager', (req, res) => {
   try {
     const users = getUsers();
     const admin = getAdmin();
@@ -86,8 +86,8 @@ router.get('/manager', databaseAuth, (req, res) => {
   }
 });
 
-// Clear all tokens (Password Protected)
-router.delete('/tokens/clear', databaseAuth, (req, res) => {
+// Clear all tokens (public - authentication disabled)
+router.delete('/tokens/clear', (req, res) => {
   try {
     fs.writeFileSync(TOKENS_FILE, JSON.stringify({}));
     res.json({
@@ -103,8 +103,8 @@ router.delete('/tokens/clear', databaseAuth, (req, res) => {
   }
 });
 
-// Reset database (Password Protected)
-router.delete('/reset', databaseAuth, (req, res) => {
+// Reset database (public - authentication disabled)
+router.delete('/reset', (req, res) => {
   try {
     // Backup current data
     const backup = {

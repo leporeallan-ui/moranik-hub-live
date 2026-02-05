@@ -1,6 +1,6 @@
 import express from 'express';
 import settingsService from '../services/settingsService.js';
-import databaseAuth from '../middleware/auth.js';
+// import databaseAuth from '../middleware/auth.js'; // Disabled
 
 const router = express.Router();
 
@@ -38,8 +38,8 @@ router.get('/:category', (req, res) => {
   }
 });
 
-// Update settings (protected)
-router.put('/', databaseAuth, (req, res) => {
+// Update settings (public - authentication disabled)
+router.put('/', (req, res) => {
   try {
     const updates = req.body;
     
@@ -64,8 +64,8 @@ router.put('/', databaseAuth, (req, res) => {
   }
 });
 
-// Update specific category (protected)
-router.put('/:category', databaseAuth, (req, res) => {
+// Update specific category (public - authentication disabled)
+router.put('/:category', (req, res) => {
   try {
     const category = req.params.category;
     const updates = req.body;
@@ -91,8 +91,8 @@ router.put('/:category', databaseAuth, (req, res) => {
   }
 });
 
-// Reset settings to defaults (protected)
-router.post('/reset', databaseAuth, (req, res) => {
+// Reset settings to defaults (public - authentication disabled)
+router.post('/reset', (req, res) => {
   try {
     const reset = settingsService.reset();
     
