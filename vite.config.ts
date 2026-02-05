@@ -19,10 +19,15 @@ export default defineConfig(({ mode }) => {
           '@': path.resolve(__dirname, '.'),
         }
       },
-      base: mode === 'production' ? './' : '/',
+      base: './',
       build: {
         outDir: 'dist',
-        assetsDir: 'assets'
+        assetsDir: 'assets',
+        rollupOptions: {
+          output: {
+            manualChunks: undefined
+          }
+        }
       }
     };
 });
