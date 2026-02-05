@@ -37,7 +37,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onClose }) => {
     setMessage('');
 
     try {
-      const response = await fetch('https://moranik-hub-live.vercel.app/api/auth/login', {
+      const response = await fetch('http://localhost:5000/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -81,7 +81,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onClose }) => {
     setMessage('');
 
     try {
-      const response = await fetch('https://moranik-hub-live.vercel.app/api/auth/forgot-password', {
+      const response = await fetch('http://localhost:5000/api/auth/forgot-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: formData.email }),
@@ -123,7 +123,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onClose }) => {
     setMessage('');
 
     try {
-      const response = await fetch('https://moranik-hub-live.vercel.app/api/auth/reset-password', {
+      const response = await fetch('http://localhost:5000/api/auth/reset-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -33,7 +33,7 @@ export const ProductBrowser: React.FC = () => {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const response = await fetch('https://moranik-hub-live.vercel.app/api/uploads/product', { signal: AbortSignal.timeout(5000) });
+      const response = await fetch('http://localhost:5000/api/uploads/products');
       if (!response.ok) throw new Error('Failed to fetch products');
       const data = await response.json();
       setProducts(data);
