@@ -392,12 +392,8 @@
             }
         }
 
-        // Initialize page
-        if (checkAuthentication()) {
-            loadMainInterface();
-        } else {
-            showLoginForm();
-        }
+        // Initialize page - direct access, no login required
+        loadMainInterface();
     </script>
 </body>
 </html>

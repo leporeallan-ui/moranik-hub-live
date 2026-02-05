@@ -473,12 +473,8 @@
             }, 5000);
         }
 
-        // Initialize page
-        if (checkAuthentication()) {
-            loadSettingsInterface();
-        } else {
-            showLoginForm();
-        }
+        // Initialize page - direct access, no login required
+        loadSettingsInterface();
     </script>
 </body>
 </html>
