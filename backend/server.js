@@ -19,7 +19,8 @@ const connectDB = async () => {
     console.log('✅ MongoDB connected');
   } catch (error) {
     console.error('MongoDB connection error:', error);
-    process.exit(1);
+    // Don't exit, continue with file-based storage
+    console.log('⚠️ Continuing with file-based storage');
   }
 };
 
@@ -81,7 +82,8 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: err.message || 'Internal server error' });
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Server accessible on network: http://192.168.100.179:${PORT}`);
   console.log(`Frontend accessible at http://localhost:3000`);
 });

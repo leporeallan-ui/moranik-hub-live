@@ -21,12 +21,16 @@ const App: React.FC = () => {
   const [novels, setNovels] = useState<Novel[]>([]);
 
   useEffect(() => {
-    storageService.init();
-    refreshBackendState();
-    
-    // Polling for remote updates (simulated)
-    const interval = setInterval(refreshBackendState, 3000);
-    return () => clearInterval(interval);
+    try {
+      storageService.init();
+      refreshBackendState();
+      
+      // Polling for remote updates (simulated)
+      const interval = setInterval(refreshBackendState, 3000);
+      return () => clearInterval(interval);
+    } catch (error) {
+      console.error('App initialization error:', error);
+    }
   }, []);
 
   const refreshBackendState = () => {
@@ -145,4 +149,40 @@ const App: React.FC = () => {
   );
 };
 
-export default App;
+// Error Boundary Component
+class ErrorBoundary extends React.Component<any, {hasError: boolean}> {
+  constructor(props: any) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error: any) {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: any, errorInfo: any) {
+    console.error('React Error Boundary caught an error:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{padding: '20px', textAlign: 'center', color: 'white'}}>
+          <h2>Something went wrong.</h2>
+          <p>Please refresh the page.</p>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
+// Wrap App with Error Boundary
+const AppWithErrorBoundary: React.FC = () => (
+  <ErrorBoundary>
+    <App />
+  </ErrorBoundary>
+);
+
+export default AppWithErrorBoundary;
