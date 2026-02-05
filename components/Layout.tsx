@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { AppView } from '../types';
 import { RegistrationForm } from './RegistrationForm';
 import { LoginForm } from './LoginForm';
-import { AdminLoginForm } from './AdminLoginForm';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -16,28 +15,11 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, onNavigate, cartC
   const isLanding = activeView === AppView.LANDING;
   const [showRegister, setShowRegister] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
-  const [showAdminLogin, setShowAdminLogin] = useState(false);
-  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
-  const [adminUsername, setAdminUsername] = useState('');
 
   useEffect(() => {
-    // Check if admin is logged in on component mount
-    const adminToken = localStorage.getItem('adminToken');
-    const adminUser = localStorage.getItem('adminUser');
-    if (adminToken && adminUser) {
-      setIsAdminLoggedIn(true);
-      setAdminUsername(adminUser);
-    }
+    // Admin functionality removed
   }, []);
 
-  const handleAdminLogout = () => {
-    localStorage.removeItem('adminToken');
-    localStorage.removeItem('adminUser');
-    setIsAdminLoggedIn(false);
-    setAdminUsername('');
-    window.location.reload();
-  };
-  
   return (
     <div className="min-h-screen flex flex-col bg-[#0f0f0f]">
       <nav className={`sticky top-0 z-50 transition-colors duration-300 border-b ${
@@ -90,16 +72,6 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, onNavigate, cartC
               >
                 📤 Upload Product
               </button>
-              {isAdminLoggedIn && (
-                <button 
-                  onClick={() => onNavigate(AppView.ADMIN)}
-                  className={`text-sm font-semibold transition-colors ${
-                    activeView === AppView.ADMIN ? 'text-red-500' : 'text-slate-500 hover:text-red-500 border-l border-white/10 pl-8'
-                  }`}
-                >
-                  <i className="fas fa-user-shield mr-2"></i> Management
-                </button>
-              )}
             </div>
 
             <div className="flex items-center space-x-4">
@@ -112,35 +84,12 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, onNavigate, cartC
                 )}
               </div>
               
-              {isAdminLoggedIn ? (
-                <>
-                  <span className="text-xs text-yellow-400 font-semibold">
-                    🔐 Admin: {adminUsername}
-                  </span>
-                  <button 
-                    onClick={handleAdminLogout}
-                    className="px-4 py-2 rounded-full text-sm font-bold transition-all bg-yellow-600 text-white hover:bg-yellow-700 shadow-lg shadow-yellow-900/20"
-                  >
-                    Admin Logout
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button className="px-5 py-2 rounded-full text-sm font-bold transition-all bg-transparent border-2 border-red-600 text-red-600 hover:bg-red-600 hover:text-white shadow-lg shadow-red-900/20" onClick={() => setShowRegister(true)}>
-                    Register
-                  </button>
-                  <button className="px-5 py-2 rounded-full text-sm font-bold transition-all bg-red-600 text-white hover:bg-red-700 shadow-lg shadow-red-900/20" onClick={() => setShowLogin(true)}>
-                    Login
-                  </button>
-                  <button 
-                    onClick={() => setShowAdminLogin(true)}
-                    className="px-4 py-2 rounded-full text-sm font-bold transition-all bg-transparent border-2 border-yellow-600 text-yellow-600 hover:bg-yellow-600 hover:text-white shadow-lg shadow-yellow-900/20"
-                    title="Admin Portal Access"
-                  >
-                    🔐
-                  </button>
-                </>
-              )}
+              <button className="px-5 py-2 rounded-full text-sm font-bold transition-all bg-transparent border-2 border-red-600 text-red-600 hover:bg-red-600 hover:text-white shadow-lg shadow-red-900/20" onClick={() => setShowRegister(true)}>
+                Register
+              </button>
+              <button className="px-5 py-2 rounded-full text-sm font-bold transition-all bg-red-600 text-white hover:bg-red-700 shadow-lg shadow-red-900/20" onClick={() => setShowLogin(true)}>
+                Login
+              </button>
             </div>
           </div>
         </div>
@@ -158,16 +107,6 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, onNavigate, cartC
         <LoginForm onClose={() => setShowLogin(false)} />
       )}
 
-      {showAdminLogin && (
-        <AdminLoginForm 
-          onClose={() => setShowAdminLogin(false)}
-          onLoginSuccess={() => {
-            setIsAdminLoggedIn(true);
-            const adminUser = localStorage.getItem('adminUser');
-            if (adminUser) setAdminUsername(adminUser);
-          }}
-        />
-      )}
 
       <footer className="bg-[#111111] border-t border-white/5 py-12 text-slate-400">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
