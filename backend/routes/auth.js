@@ -79,7 +79,12 @@ const generateVerificationCode = () => {
 // Register endpoint
 router.post('/register', async (req, res) => {
   try {
-    const { username, email, password } = req.body;
+    let username, email, password;
+    try {
+      ({ username, email, password } = req.body);
+    } catch (error) {
+      return res.status(400).json({ error: 'Invalid JSON in request body' });
+    }
 
     // Validation
     if (!username || !email || !password) {
@@ -193,7 +198,12 @@ router.post('/verify-email', async (req, res) => {
 // Login endpoint
 router.post('/login', async (req, res) => {
   try {
-    const { username, password } = req.body;
+    let username, password;
+    try {
+      ({ username, password } = req.body);
+    } catch (error) {
+      return res.status(400).json({ error: 'Invalid JSON in request body' });
+    }
 
     if (!username || !password) {
       return res.status(400).json({ error: 'Username and password are required' });
@@ -244,7 +254,12 @@ router.post('/login', async (req, res) => {
 // Forgot password endpoint
 router.post('/forgot-password', async (req, res) => {
   try {
-    const { email } = req.body;
+    let email;
+    try {
+      ({ email } = req.body);
+    } catch (error) {
+      return res.status(400).json({ error: 'Invalid JSON in request body' });
+    }
 
     if (!email) {
       return res.status(400).json({ error: 'Email is required' });
@@ -294,7 +309,12 @@ router.post('/forgot-password', async (req, res) => {
 // Reset password endpoint
 router.post('/reset-password', async (req, res) => {
   try {
-    const { email, code, newPassword } = req.body;
+    let email, code, newPassword;
+    try {
+      ({ email, code, newPassword } = req.body);
+    } catch (error) {
+      return res.status(400).json({ error: 'Invalid JSON in request body' });
+    }
 
     if (!email || !code || !newPassword) {
       return res.status(400).json({ error: 'All fields are required' });
