@@ -1,19 +1,19 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import SimpleApp from './App.simple';
+import App from './App';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
   throw new Error("Could not find root element to mount to");
 }
 
-console.log('Starting React app...');
+console.log('Starting full React app...');
 
 const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
-    <SimpleApp />
+    <App />
   </React.StrictMode>
 );
 
@@ -27,4 +27,4 @@ window.addEventListener('error', (event) => {
   console.error('Global error:', event.error);
 });
 
-console.log('React app rendered');
+console.log('Full React app rendered');

@@ -11,9 +11,13 @@ import { AppView, CartItem, SoftwareProduct, MusicTrack, Novel, SiteSettings } f
 import { storageService } from './services/storageService';
 
 const App: React.FC = () => {
+  console.log('App component rendering...');
+  
   const [activeView, setActiveView] = useState<AppView>(AppView.LANDING);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [settings, setSettings] = useState<SiteSettings | null>(null);
+  
+  console.log('App state initialized');
   
   // Virtual Backend States
   const [softwares, setSoftwares] = useState<SoftwareProduct[]>([]);
@@ -21,9 +25,12 @@ const App: React.FC = () => {
   const [novels, setNovels] = useState<Novel[]>([]);
 
   useEffect(() => {
+    console.log('App useEffect running...');
     try {
       storageService.init();
+      console.log('Storage service initialized');
       refreshBackendState();
+      console.log('Backend state refreshed');
       
       // Polling for remote updates (simulated)
       const interval = setInterval(refreshBackendState, 3000);
@@ -136,6 +143,7 @@ const App: React.FC = () => {
     return <AdminPortal onRefreshData={refreshBackendState} />;
   };
 
+  console.log('About to render App...');
   return (
     <Layout activeView={activeView} onNavigate={handleNavigate} cartCount={cart.length}>
       {activeView === AppView.LANDING && renderLanding()}
