@@ -1,0 +1,7 @@
+{
+  "name": "Moranik Hub",
+  "description": "A high-end dual-module platform featuring Moranik Tech for software and hosting, and Moranik Entertainment for music and literature.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
