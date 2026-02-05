@@ -26,7 +26,7 @@ export const AdminLoginForm: React.FC<AdminLoginFormProps> = ({ onClose, onLogin
     setMessage('');
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/admin-login', {
+      const response = await fetch('http://192.168.100.179:5000/api/auth/admin-login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
