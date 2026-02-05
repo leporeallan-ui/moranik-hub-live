@@ -1,19 +1,19 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import MinimalApp from './App.minimal';
+import TestApp1 from './App.test1';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
   throw new Error("Could not find root element to mount to");
 }
 
-console.log('Starting minimal React app...');
+console.log('Starting TestApp1 with Layout component...');
 
 const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
-    <MinimalApp />
+    <TestApp1 />
   </React.StrictMode>
 );
 
@@ -27,4 +27,4 @@ window.addEventListener('error', (event) => {
   console.error('Global error:', event.error);
 });
 
-console.log('Minimal React app rendered');
+console.log('TestApp1 rendered');
